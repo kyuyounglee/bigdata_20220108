@@ -3,10 +3,14 @@ getwd()
 install.packages("ggplot2")
 library(ggplot2)
 ks <- read.csv("9.csv", colClasses = c(rep("factor", 6), rep("numeric", 3)))
-head(ks)
+str(ks)
+
+ggplot(data = ks, mapping = aes(x = 날씨)) + geom_bar()
+
+
 
 P2_0 <- ggplot(data = ks,mapping = aes(x = 풍속))
-P2_1 <- P2_0 + geom_histogram(breaks=seq(0,25,0.5))
+P2_1 <- P2_0 + geom_histogram()
 P2_2 <- P2_1 + facet_wrap(~도시, ncol = 3)
 
 install.packages("dplyr")
