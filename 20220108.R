@@ -86,3 +86,73 @@ P6_0 = ks %>% ggplot(mapping = aes(x=날씨))
   geom_point(aes(group = 도시,color=도시),stat="count"))
 
 #점의 색과 점의 종류 매핑
+P7_0 = ggplot(data=ks_temp,mapping = aes(x=기온2014,y=기온2015))
+(P7_1 = P7_0 + geom_point(aes(color = 계절, shape=계절)))
+
+#축에 관한 설정
+P8_0 <- ggplot(data = ks, mapping = aes(x = 날씨)) + 
+  geom_bar(aes(fill = 계절))
+P8_1 <- P8_0 + 
+  scale_y_continuous(limits = c(0,6000), breaks = seq(0, 6000, 1000))
+P8_2 <- P8_1 + labs(x = "날씨의 종류", y = "도수")
+(P8_3 <- P8_2 + 
+    theme(axis.text.x = element_text(size = 15), 
+          axis.title.y = element_text(size = 20)))
+
+#범례에 관한 설정
+keys <- c("봄", "여름", "가을", "겨울")
+mycolor <- c("plum", "tomato", "wheat", "lemonchiffon")
+names(mycolor) <- keys
+P8_4 <- P8_3 + scale_fill_manual(values = mycolor)
+P8_5 <- P8_4 + theme(legend.position = "bottom")
+P8_6 <- P8_5 + labs(fill = "사계절")
+(P8_7 <- P8_6 + guides(fill = guide_legend(nrow = 1, byrow = TRUE)))
+
+#집계 데이터로부터의 막대그래프
+ks_bar = ks %>% group_by(계절,날씨) %>% summarise(도수 = n()) %>% 
+  complete(계절,날씨, fill=list(도수=0)) %>% 
+  as.data.frame() 
+
+(P9_0 <- ggplot(ks_bar, aes(x = 날씨, y = 도수)) + 
+    geom_bar(aes(fill = 계절), stat = "identity"))
+
+#집계 데이터로부터의 꺾은 선 그래프
+ks_line <- ks %>% 
+  group_by(월, 도시) %>% 
+  summarise(평균강수량 = mean(강수량)) %>% 
+  as.data.frame()
+P9_1 <- ggplot(ks_line, aes(x = 월, y = 평균강수량))
+P9_2 <- P9_1 + geom_line(aes(group = 도시, color = 도시, 
+                             linetype = 도시), stat = "identity")
+(P9_3 <- P9_2 + geom_point(aes(group = 도시, color = 도시), 
+                           stat = "identity"))
+
+#문자정보를 부가한다（geom_text）
+P10_1 <- ggplot(data = ks,mapping = aes(x = 날씨)) + 
+  geom_bar()
+(P10_2 <- P10_1 + geom_text(aes(label = ..count..), 
+                            stat = "count", vjust = -0.5))
+
+#분포의 모양을 알아본다（geom_density，geom_vline）
+ks_mean_temp <- ks %>% 
+  group_by(계절,도시) %>% 
+  summarise(평균기온 = mean(기온)) %>% 
+  as.data.frame()
+P10_3 <- ggplot(data = ks, mapping = aes(x = 기온)) + 
+  geom_density(aes(linetype = 계절, color = 계절))
+P10_4 <- P10_3 + geom_vline(data = ks_mean_temp, 
+                            aes(xintercept = 평균기온, color = 계절), 
+                            linetype = "twodash") #linetype의 다른 종류는"solid","longdash","dotted","dotdash","dashed","blank"
+(P10_5 <- P10_4 + facet_wrap( ~ 도시))
+
+#데이터의 산포도를 상세하게 조사한다（geom_jitter）
+P10_6 <- ggplot(data = ks,mapping = aes(x = 도시, y = 풍속)) + 
+  geom_jitter(aes(color = 계절, group = 계절), 
+              position = position_jitterdodge(dodge.width = 0.6), 
+              alpha = 1 / 5) #position_jitterdodge(dodge.width = 0.6)로 점의 산포도 폭을 지정
+(P10_7 <- P10_6 + stat_summary(aes(x = 도시, y = 풍속, group = 계절), 
+     color = "white", 
+     fun = median, geom = "point", 
+     shape = 4, 
+     position = position_dodge(width = 0.6))) #position_dodge(width = 0.6)로 dodge의 폭을 지정
+
